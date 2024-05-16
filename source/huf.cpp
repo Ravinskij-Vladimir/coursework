@@ -4,6 +4,7 @@
 #include <list>
 #include <fstream>
 #include <iomanip>
+#include <cstring>
 #include "scopeGuard.hpp"
 
 constexpr int bitsInByte()
@@ -149,8 +150,46 @@ void decodeAndWrite(Node *root, std::istream &input, std::ostream &output)
   std::cout << '\n';
 }
 
+void printHelp()
+{
+  std::cout << "Usage: huffman [COMMAND] [FILES]...\n";
+  std::cout << "Working with encoding and decoding texts from files.\n";
+  std::cout << "Example: huffman encode text1 text2 encoding1\n";
+  std::cout << "\nWorking with text:\n";
+  std::cout << "\tadd-text\t <text-name> <file>\n"; //\t add text to work with
+  std::cout << "\tsave-text\t <text-name> <file>\n"; //\t write text to the file (content of the file will be overwritten)
+  std::cout << "\tdelete-text\t <text-name>\n"; // \t\t delete text to work with
+  std::cout << "\tprint-text\t <text-name>\n"; // \t\t print text to the console
+
+  std::cout << "\nEncoding/decoding:\n";
+  std::cout << "\tcreate-encoding\t <text-name> <encoding-name>\t\n";
+  std::cout << "\tdelete-encoding\t <encoding-name>\t\n";
+  std::cout << "\tdecode\t\t <encoded-text> <decoded-text> <encoding-name>\t\n";
+  std::cout << "\tadd-encoding\t <encoding-name> <file>\t\n";
+  std::cout << "\tsave-encoding\t <encoding-name> <file>\t\n";
+
+  std::cout << "\nComparing encodings:\n";
+  std::cout << "\tcompare-encodings <text-name> <encoding-name-1> <encoding-name-2> <...> <encoding-name-N>\t";
+  std::cout << "\n\nDescrption:\n";
+  std::cout << "\tadd-text\t <text-name> <file> \t add text to work with\n";
+}
+
 int main(int argc, char *argv[])
 {
+  if (argc == 2)
+  {
+    std::string arg(argv[1]);
+    if (arg == "--help")
+    {
+      printHelp();
+      return 0;
+    }
+    else 
+    {
+      std::cerr << "Invalid parameter. --help is available.\n";
+      return 1;
+    }
+  }
   std::vector<bool> code;
   std::map<char, std::vector<bool>> table;
   ////// считаем частоты символов
