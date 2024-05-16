@@ -24,11 +24,10 @@ struct Node
 	{
 	}
 
-	Node(Node *leftNode, Node *rightNode) : 
-		frequency(0),
-		symbol(0),
-		left(leftNode),
-		right(rightNode)
+	Node(Node *leftNode, Node *rightNode) : frequency(0),
+											symbol(0),
+											left(leftNode),
+											right(rightNode)
 	{
 		frequency = leftNode->frequency + rightNode->frequency;
 	}
@@ -45,18 +44,18 @@ struct NodeComparator
 std::vector<bool> code;
 std::map<char, std::vector<bool>> table;
 
-void BuildTable(Node *root, std::vector<bool> &code, std::map<char, std::vector<bool>> &table)
+void buildTable(Node *root, std::vector<bool> &code, std::map<char, std::vector<bool>> &table)
 {
 	if (root->left != nullptr)
 	{
 		code.push_back(0);
-		BuildTable(root->left, code, table);
+		buildTable(root->left, code, table);
 	}
 
 	if (root->right != nullptr)
 	{
 		code.push_back(1);
-		BuildTable(root->right, code, table);
+		buildTable(root->right, code, table);
 	}
 
 	if (root->left == nullptr && root->right == nullptr)
@@ -65,19 +64,45 @@ void BuildTable(Node *root, std::vector<bool> &code, std::map<char, std::vector<
 	code.pop_back();
 }
 
-void makeAlphabet(std::istream &input, std::map<char, int> &alphabet)
+void readAlphabet(std::istream &input, std::map<char, int> &alphabet)
 {
 	ravinskij::ScopeGuard guard(input);
 	input >> std::noskipws;
 	char c = 0;
 	while (!input.eof())
 	{
-		input >> c;
+		c = input.get();
 		alphabet[c]++;
 	}
 
 	input.clear();
 	input.seekg(0); // перемещаем указатель снова в начало файла
+}
+
+void buildHuffmanTree(std::list<Node *> &lst, const std::map<char, int> &alphabet, NodeComparator comp)
+{
+	for (auto itr = alphabet.cbegin(); itr != alphabet.cend(); ++itr)
+	{
+		Node *p = new Node;
+		p->symbol = itr->first;
+		p->frequency = itr->second;
+		lst.push_back(p);
+	}
+
+	//////  создаем дерево
+
+	while (lst.size() != 1)
+	{
+		lst.sort(comp);
+
+		Node *leftChild = lst.front();
+		lst.pop_front();
+		Node *rightChild = lst.front();
+		lst.pop_front();
+
+		Node *parent = new Node(leftChild, rightChild);
+		lst.push_back(parent);
+	}
 }
 
 int main(int argc, char *argv[])
@@ -86,39 +111,18 @@ int main(int argc, char *argv[])
 	std::ifstream input("/home/denny/Рабочий стол/coursework/1.txt", std::ios::out | std::ios::binary);
 
 	std::map<char, int> m;
-	makeAlphabet(input, m);
+	readAlphabet(input, m);
 
 	////// записываем начальные узлы в список std::list
 
 	std::list<Node *> t;
-	for (auto itr = m.cbegin(); itr != m.cend(); ++itr)
-	{
-		Node *p = new Node;
-		p->symbol = itr->first;
-		p->frequency = itr->second;
-		t.push_back(p);
-	}
-
-	//////  создаем дерево
-
-	while (t.size() != 1)
-	{
-		t.sort(NodeComparator());
-
-		Node *SonL = t.front();
-		t.pop_front();
-		Node *SonR = t.front();
-		t.pop_front();
-
-		Node *parent = new Node(SonL, SonR);
-		t.push_back(parent);
-	}
+	buildHuffmanTree(t, m, NodeComparator());
 
 	Node *root = t.front(); // root - указатель на вершину дерева
 
 	////// создаем пары 'символ-код':
 
-	BuildTable(root, code, table);
+	buildTable(root, code, table);
 
 	////// Выводим коды в файл output.txt
 
@@ -172,7 +176,7 @@ int main(int argc, char *argv[])
 		if (position == bitsInByte())
 		{
 			position = 0;
-			in >> byte;
+			byte = in.get();
 		}
 	}
 	std::cout << '\n';
