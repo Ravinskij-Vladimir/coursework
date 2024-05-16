@@ -27,39 +27,38 @@ void rav::printHelp()
   std::cout << "\tadd-text\t <text-name> <file> \t add text to work with\n";
 }
 
-void rav::addText(const std::string& text, std::ifstream& file, fileSet& files)
+void rav::addText(std::istream& in, fileSet& files)
+{
+}
+void rav::saveText(std::istream& in, fileSet& files)
+{
+}
+void rav::deleteText(std::istream& in, fileSet& files)
+{
+}
+void rav::printText(std::istream& in, std::ostream& out, const fileSet& files)
 {
 }
 
-void rav::saveText(const std::string& text, std::ofstream& file, fileSet& files)
+void rav::createEncoding(std::istream& in, encodesTable& encodings)
 {
 }
-void rav::deleteText(const std::string& text, fileSet& files)
+void rav::deleteEncoding(std::istream& in, encodesTable& encodings)
 {
 }
-void rav::printText(const std::string& text, const fileSet& files)
+void rav::encode(std::istream& in, encodesTable& encodings, fileSet& files)
 {
 }
-
-void rav::createEncoding(const std::string& encoding, const std::string&encode, encodesTable&encodings)
+void rav::decode(std::istream& in, encodesTable& encodings, fileSet& files)
 {
 }
-void rav::deleteEncoding(const std::string& encoding, encodesTable& encodings)
+void rav::addEncoding(std::istream& in, encodesTable& encodings)
 {
 }
-void rav::encode(const std::string& text, const std::string& encoded, const std::string& encoding, encodesTable& encodings, fileSet& files)
-{
-}
-void rav::decode(const std::string& text, const std::string& encoded, const std::string& encoding, encodesTable& encodings, fileSet& files)
-{
-}
-void rav::addEncoding(const std::string& encoding, std::ifstream& file, encodesTable& encodings)
-{
-}
-void rav::saveEncoding(const std::string& encoding, std::ofstream& file, encodesTable& encodings)
+void rav::saveEncoding(std::istream& in, encodesTable& encodings)
 {
 }
 
-void rav::compareEncodings(const std::string& text, const std::list<std::string>& encodesList, const encodesTable& encodings)
+void rav::compareEncodings(std::istream& in, const encodesTable& encodings)
 {
 }
