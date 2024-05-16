@@ -13,21 +13,22 @@ constexpr int bitsInByte()
 
 struct Node
 {
-	int frequency;
+	size_t frequency;
 	char symbol;
 	Node *left, *right;
 
-	Node() : frequency(0),
-			 symbol(0),
-			 left(nullptr),
-			 right(nullptr)
-	{
-	}
+	Node(): 
+		frequency(0),
+		symbol(0),
+		left(nullptr),
+		right(nullptr)
+	{}
 
-	Node(Node *leftNode, Node *rightNode) : frequency(0),
-											symbol(0),
-											left(leftNode),
-											right(rightNode)
+	Node(Node *leftNode, Node *rightNode): 
+		frequency(0),
+		symbol(0),
+		left(leftNode),
+		right(rightNode)
 	{
 		frequency = leftNode->frequency + rightNode->frequency;
 	}
@@ -41,8 +42,6 @@ struct NodeComparator
 	}
 };
 
-std::vector<bool> code;
-std::map<char, std::vector<bool>> table;
 
 void buildTable(Node *root, std::vector<bool> &code, std::map<char, std::vector<bool>> &table)
 {
@@ -66,8 +65,6 @@ void buildTable(Node *root, std::vector<bool> &code, std::map<char, std::vector<
 
 void readAlphabet(std::istream &input, std::map<char, int> &alphabet)
 {
-	ravinskij::ScopeGuard guard(input);
-	input >> std::noskipws;
 	char c = 0;
 	while (!input.eof())
 	{
@@ -105,35 +102,14 @@ void buildHuffmanTree(std::list<Node *> &lst, const std::map<char, int> &alphabe
 	}
 }
 
-int main(int argc, char *argv[])
+void encodeAndWrite(const std::map<char, std::vector<bool>>& table, std::istream& input, std::ostream& output)
 {
-	////// считаем частоты символов
-	std::ifstream input("/home/denny/Рабочий стол/coursework/1.txt", std::ios::out | std::ios::binary);
-
-	std::map<char, int> m;
-	readAlphabet(input, m);
-
-	////// записываем начальные узлы в список std::list
-
-	std::list<Node *> t;
-	buildHuffmanTree(t, m, NodeComparator());
-
-	Node *root = t.front(); // root - указатель на вершину дерева
-
-	////// создаем пары 'символ-код':
-
-	buildTable(root, code, table);
-
-	////// Выводим коды в файл output.txt
-
-	std::ofstream output("/home/denny/Рабочий стол/coursework/output.txt", std::ios::out | std::ios::binary);
-
 	int position = 0;
 	char buf = 0;
 	while (!input.eof())
 	{
 		char c = input.get();
-		std::vector<bool> x = table[c];
+		std::vector<bool> x = table.at(c);
 		for (size_t n = 0; n < x.size(); n++)
 		{
 			buf = buf | x[n] << (bitsInByte() - 1 - position);
@@ -146,41 +122,65 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
+}
 
-	input.close();
-	output.close();
-
-	///// считывание из файла output.txt и преобразование обратно
-
-	std::ifstream in("/home/denny/Рабочий стол/coursework/output.txt", std::ios::in | std::ios::binary);
-
-	setlocale(LC_ALL, "Russian"); // чтоб русские символы отображались в командной строке
-
+void decodeAndWrite(Node* root, std::istream& input, std::ostream& output)
+{
 	Node *p = root;
-	position = 0;
+	int position = 0;
 	char byte;
-	byte = in.get();
-	while (!in.eof())
+	byte = input.get();
+	while (!input.eof())
 	{
-		bool b = byte & (1 << (bitsInByte() - 1 - position));
-		if (b)
+		bool checkedBitState = byte & (1 << (bitsInByte() - 1 - position));
+		if (checkedBitState)
 			p = p->right;
 		else
 			p = p->left;
 		if (p->left == nullptr && p->right == nullptr)
 		{
-			std::cout << p->symbol;
+			output << p->symbol;
 			p = root;
 		}
 		position++;
 		if (position == bitsInByte())
 		{
 			position = 0;
-			byte = in.get();
+			byte = input.get();
 		}
 	}
 	std::cout << '\n';
-	in.close();
+}
 
+int main(int argc, char *argv[])
+{
+	std::vector<bool> code;
+	std::map<char, std::vector<bool>> table;
+	////// считаем частоты символов
+	std::ifstream input("/home/denny/Рабочий стол/coursework/1.txt", std::ios::out | std::ios::binary);
+
+	std::map<char, int> alphabet;
+	readAlphabet(input, alphabet);
+
+	////// записываем начальные узлы в список std::list
+
+	std::list<Node *> tree;
+	buildHuffmanTree(tree, alphabet, NodeComparator());
+	
+	////// создаем пары 'символ-код':
+	Node *root = tree.front(); // root - указатель на вершину дерева
+	buildTable(root, code, table);
+
+	////// Выводим коды в файл output.txt
+	std::ofstream output("/home/denny/Рабочий стол/coursework/output.txt", std::ios::out | std::ios::binary);
+	encodeAndWrite(table, input, output);
+	input.close();
+	output.close();
+
+	///// считывание из файла output.txt и преобразование обратно
+	std::ifstream in("/home/denny/Рабочий стол/coursework/output.txt", std::ios::in | std::ios::binary);
+	decodeAndWrite(root, in, std::cout);
+	
+	in.close();
 	return 0;
 }
