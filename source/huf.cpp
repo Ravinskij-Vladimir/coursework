@@ -152,64 +152,64 @@ void decodeAndWrite(Node *root, std::istream &input, std::ostream &output)
 
 
 
-int main(int argc, char *argv[])
-{
-  using namespace ravinskij;
-  if (argc == 2)
-  {
-    std::string arg(argv[1]);
-    if (arg == "--help")
-    {
-      printHelp();
-      return 0;
-    }
-    else 
-    {
-      std::cerr << "Invalid parameter. --help is available.\n";
-      return 1;
-    }
-  }
-  using encodeMap = std::map<char, std::vector<bool>>;
-  std::map<std::string, encodeMap> encodings;
-  std::vector<bool> code;
-  encodeMap table;
-  std::string name = "encoding1";
-  encodings.insert({name , table});
-  ////// считаем частоты символов
-  std::ifstream input("/home/denny/Рабочий стол/coursework/1.txt", std::ios::out | std::ios::binary);
+// int main(int argc, char *argv[])
+// {
+//   using namespace ravinskij;
+//   if (argc == 2)
+//   {
+//     std::string arg(argv[1]);
+//     if (arg == "--help")
+//     {
+//       printHelp();
+//       return 0;
+//     }
+//     else 
+//     {
+//       std::cerr << "Invalid parameter. --help is available.\n";
+//       return 1;
+//     }
+//   }
+//   using encodeMap = std::map<char, std::vector<bool>>;
+//   std::map<std::string, encodeMap> encodings;
+//   std::vector<bool> code;
+//   encodeMap table;
+//   std::string name = "encoding1";
+//   encodings.insert({name , table});
+//   ////// считаем частоты символов
+//   std::ifstream input("/home/denny/Рабочий стол/coursework/1.txt", std::ios::out | std::ios::binary);
 
-  std::map<char, int> alphabet;
-  readAlphabet(input, alphabet);
+//   std::map<char, int> alphabet;
+//   readAlphabet(input, alphabet);
 
-  ////// записываем начальные узлы в список std::list
+//   ////// записываем начальные узлы в список std::list
 
-  std::list<Node *> tree;
-  buildHuffmanTree(tree, alphabet, NodeComparator());
+//   std::list<Node *> tree;
+//   buildHuffmanTree(tree, alphabet, NodeComparator());
 
-  ////// создаем пары 'символ-код':
-  Node *root = tree.front(); // root - указатель на вершину дерева
-  try 
-  {
-    buildTable(root, code, encodings[name]);
-  }
-  catch (const std::out_of_range& e)
-  {
-    std::cerr << e.what() << '\n';
-    return 1;
-  }
+//   ////// создаем пары 'символ-код':
+//   Node *root = tree.front(); // root - указатель на вершину дерева
+//   try 
+//   {
+//     buildTable(root, code, encodings[name]);
+//   }
+//   catch (const std::out_of_range& e)
+//   {
+//     std::cerr << e.what() << '\n';
+//     return 1;
+//   }
 
-  ////// Выводим коды в файл output.txt
-  std::ofstream output("/home/denny/Рабочий стол/coursework/output.txt", std::ios::out | std::ios::binary);
-  encodeAndWrite(encodings[name], input, output);
-  input.close();
-  output.close();
+//   ////// Выводим коды в файл output.txt
+//   std::ofstream output("/home/denny/Рабочий стол/coursework/output.txt", std::ios::out | std::ios::binary);
+//   encodeAndWrite(encodings[name], input, output);
+//   input.close();
+//   output.close();
 
-  ///// считывание из файла output.txt и преобразование обратно
-  std::ifstream in("/home/denny/Рабочий стол/coursework/output.txt", std::ios::in | std::ios::binary);
-  decodeAndWrite(root, in, std::cout);
+//   ///// считывание из файла output.txt и преобразование обратно
+//   std::ifstream in("/home/denny/Рабочий стол/coursework/output.txt", std::ios::in | std::ios::binary);
+//   decodeAndWrite(root, in, std::cout);
 
-  std::ifstream in2("/home/denny/Рабочий стол/coursework/2.txt", std::ios::in | std::ios::binary);
-  decodeAndWrite(root, in2, std::cout);
-  in.close();
-  return 0;
-}
+//   std::ifstream in2("/home/denny/Рабочий стол/coursework/2.txt", std::ios::in | std::ios::binary);
+//   decodeAndWrite(root, in2, std::cout);
+//   in.close();
+//   return 0;
+// }

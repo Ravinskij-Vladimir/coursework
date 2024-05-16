@@ -27,39 +27,39 @@ void rav::printHelp()
   std::cout << "\tadd-text\t <text-name> <file> \t add text to work with\n";
 }
 
-void rav::addText(const std::string &textName, std::ifstream &file)
+void rav::addText(const std::string& text, std::ifstream& file, fileSet& files)
 {
 }
 
-void rav::saveText(const std::string &textName, std::ofstream &file)
+void rav::saveText(const std::string& text, std::ofstream& file, fileSet& files)
 {
 }
-void rav::deleteText(const std::string &textName)
+void rav::deleteText(const std::string& text, fileSet& files)
 {
 }
-void rav::printText(const std::string &textName)
-{
-}
-
-void rav::createEncoding(const std::string &textName, const std::string &encodingName)
-{
-}
-void rav::deleteEncoding(const std::string &encodingName)
-{
-}
-void rav::encode(const std::string &textName, const std::string &encodedName, const std::string &encodingName)
-{
-}
-void rav::decode(const std::string &textName, const std::string &encodedName, const std::string &encodingName)
-{
-}
-void rav::addEncoding(const std::string &encodingName, std::ifstream &file)
-{
-}
-void rav::saveEncoding(const std::string &encodingName, std::ofstream &file)
+void rav::printText(const std::string& text, const fileSet& files)
 {
 }
 
-void rav::compareEncodings(const std::string &textName, const std::list<std::string> &encodings)
+void rav::createEncoding(const std::string& encoding, const std::string&encode, encodesTable&encodings)
+{
+}
+void rav::deleteEncoding(const std::string& encoding, encodesTable& encodings)
+{
+}
+void rav::encode(const std::string& text, const std::string& encoded, const std::string& encoding, encodesTable& encodings, fileSet& files)
+{
+}
+void rav::decode(const std::string& text, const std::string& encoded, const std::string& encoding, encodesTable& encodings, fileSet& files)
+{
+}
+void rav::addEncoding(const std::string& encoding, std::ifstream& file, encodesTable& encodings)
+{
+}
+void rav::saveEncoding(const std::string& encoding, std::ofstream& file, encodesTable& encodings)
+{
+}
+
+void rav::compareEncodings(const std::string& text, const std::list<std::string>& encodesList, const encodesTable& encodings)
 {
 }
