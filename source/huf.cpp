@@ -3,9 +3,9 @@
 #include <map>
 #include <list>
 #include <fstream>
-#include <iomanip>
-#include <cstring>
+#include <stdexcept>
 #include "scopeGuard.hpp"
+#include "commands.hpp"
 
 constexpr int bitsInByte()
 {
@@ -147,35 +147,14 @@ void decodeAndWrite(Node *root, std::istream &input, std::ostream &output)
       byte = input.get();
     }
   }
-  std::cout << '\n';
+  output << '\n';
 }
 
-void printHelp()
-{
-  std::cout << "Usage: huffman [COMMAND] [FILES]...\n";
-  std::cout << "Working with encoding and decoding texts from files.\n";
-  std::cout << "Example: huffman encode text1 text2 encoding1\n";
-  std::cout << "\nWorking with text:\n";
-  std::cout << "\tadd-text\t <text-name> <file>\n"; //\t add text to work with
-  std::cout << "\tsave-text\t <text-name> <file>\n"; //\t write text to the file (content of the file will be overwritten)
-  std::cout << "\tdelete-text\t <text-name>\n"; // \t\t delete text to work with
-  std::cout << "\tprint-text\t <text-name>\n"; // \t\t print text to the console
 
-  std::cout << "\nEncoding/decoding:\n";
-  std::cout << "\tcreate-encoding\t <text-name> <encoding-name>\t\n";
-  std::cout << "\tdelete-encoding\t <encoding-name>\t\n";
-  std::cout << "\tdecode\t\t <encoded-text> <decoded-text> <encoding-name>\t\n";
-  std::cout << "\tadd-encoding\t <encoding-name> <file>\t\n";
-  std::cout << "\tsave-encoding\t <encoding-name> <file>\t\n";
-
-  std::cout << "\nComparing encodings:\n";
-  std::cout << "\tcompare-encodings <text-name> <encoding-name-1> <encoding-name-2> <...> <encoding-name-N>\t";
-  std::cout << "\n\nDescrption:\n";
-  std::cout << "\tadd-text\t <text-name> <file> \t add text to work with\n";
-}
 
 int main(int argc, char *argv[])
 {
+  using namespace ravinskij;
   if (argc == 2)
   {
     std::string arg(argv[1]);
@@ -190,8 +169,12 @@ int main(int argc, char *argv[])
       return 1;
     }
   }
+  using encodeMap = std::map<char, std::vector<bool>>;
+  std::map<std::string, encodeMap> encodings;
   std::vector<bool> code;
-  std::map<char, std::vector<bool>> table;
+  encodeMap table;
+  std::string name = "encoding1";
+  encodings.insert({name , table});
   ////// считаем частоты символов
   std::ifstream input("/home/denny/Рабочий стол/coursework/1.txt", std::ios::out | std::ios::binary);
 
@@ -205,11 +188,19 @@ int main(int argc, char *argv[])
 
   ////// создаем пары 'символ-код':
   Node *root = tree.front(); // root - указатель на вершину дерева
-  buildTable(root, code, table);
+  try 
+  {
+    buildTable(root, code, encodings[name]);
+  }
+  catch (const std::out_of_range& e)
+  {
+    std::cerr << e.what() << '\n';
+    return 1;
+  }
 
   ////// Выводим коды в файл output.txt
   std::ofstream output("/home/denny/Рабочий стол/coursework/output.txt", std::ios::out | std::ios::binary);
-  encodeAndWrite(table, input, output);
+  encodeAndWrite(encodings[name], input, output);
   input.close();
   output.close();
 
@@ -217,6 +208,8 @@ int main(int argc, char *argv[])
   std::ifstream in("/home/denny/Рабочий стол/coursework/output.txt", std::ios::in | std::ios::binary);
   decodeAndWrite(root, in, std::cout);
 
+  std::ifstream in2("/home/denny/Рабочий стол/coursework/2.txt", std::ios::in | std::ios::binary);
+  decodeAndWrite(root, in2, std::cout);
   in.close();
   return 0;
 }
