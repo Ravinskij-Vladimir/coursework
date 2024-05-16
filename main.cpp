@@ -1,13 +1,24 @@
 #include <iostream>
 #include <fstream>
-#include <limits>
 #include <string>
+#include <functional>
+#include <map>
+#include <set>
 
 int main()
 {
+  std::set<std::string> files;
   std::string fileName;
   std::cin >> fileName;
-  std::ifstream in(fileName);
+  std::string fileName2 = "3.txt";
+  files.insert(fileName);
+  files.insert(fileName2);
+  if (files.find(fileName) == files.cend())
+  {
+    std::cerr << "No such file\n";
+    return 1;
+  }
+  std::ifstream in(*files.find(fileName));
   if (in.is_open())
   {
     while (!in.eof())
