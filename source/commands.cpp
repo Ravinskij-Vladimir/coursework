@@ -177,10 +177,11 @@ void copyFile(std::ifstream& in, std::ostream& out)
 {
   while(!in.eof())
   {
-    out << in.get();
+    std::string line;
+    std::getline(in, line, '\n');
+    out << line << '\n';
   }
 }
-
 
 void rav::addText(std::istream& in, fileTable& files)
 {
@@ -197,6 +198,7 @@ void rav::addText(std::istream& in, fileTable& files)
   {
     throw std::logic_error("Couldn't open file");
   }
+  copyFile(input, std::cout);
   files.insert({textName, fileName});
   input.close();
 }
@@ -224,7 +226,7 @@ void rav::deleteText(std::istream& in, fileTable& files)
 {
   std::string textName;
   in >> textName;
-  if (files.find(textName) == files.cend())
+  if (files.find(textName) != files.cend())
   {
     throw std::logic_error("Requested text is not found");
   }

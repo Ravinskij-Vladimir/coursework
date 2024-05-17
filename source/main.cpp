@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
     }
     catch (const std::logic_error &e)
     {
-      std::cout << "<INVALID_COMMAND>" << "\n";
+      std::cout << e.what() << "\n";
     }
     catch (const std::exception &e)
     {
