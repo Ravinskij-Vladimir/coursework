@@ -40,8 +40,8 @@ void rav::printHelp()
   std::cout << "\tadd-encoding\t add the encoding table from the file in the format 'symbol - binary code'\n";
   std::cout << "\tsave-encoding\t save the encoding table to the file in the format 'symbol - binary code'\n";
   std::cout << "\tcompare-encodings\t Compares encodings applied to the same text.\n";
-  std::cout << "\tDisplays a comparison table of the format on the console:";
-  std::cout << "encoding name - size of the compressed text in bytes - \n\tcompression percentage accurate to two decimal places";
+  std::cout << "\t\t\t\tDisplays a comparison table of the format on the console:";
+  std::cout << "encoding name - size of the compressed text in bytes - \n\t\t\t\tcompression percentage accurate to two decimal places";
   std::cout << "(for the source text, the text name is displayed instead of the encoding).\n";
 }
 
@@ -80,7 +80,7 @@ struct NodeComparator
   }
 };
 
-void buildTable(Node *root, std::vector<bool> &code, std::map<char, std::vector<bool>> &table)
+void buildTable(Node *root, std::vector<bool> &code, rav::encodeMap &table)
 {
   if (root->left != nullptr)
   {
@@ -111,6 +111,10 @@ void readAlphabet(std::istream &input, std::map<char, int> &alphabet)
 
   input.clear();
   input.seekg(0); // перемещаем указатель снова в начало файла
+}
+
+void readEncoding(std::istream& in, rav::encodeMap& encoding)
+{
 }
 
 void buildHuffmanTree(std::list<Node *> &lst, const std::map<char, int> &alphabet, NodeComparator comp)
@@ -213,13 +217,13 @@ void rav::addText(std::istream& in, fileTable& files)
   {
     throw std::logic_error("Couldn't open file");
   }
-  copyFile(input, std::cout);
+  //copyFile(input, std::cout);
   files.insert({textName, fileName});
   input.close();
-  for (auto it = files.cbegin(); it != files.cend(); it++)
-  {
-    std::cout << it->first << ' ' << it->second << '\n';
-  }
+  // for (auto it = files.cbegin(); it != files.cend(); it++)
+  // {
+  //   std::cout << it->first << ' ' << it->second << '\n';
+  // }
 }
 
 void rav::saveText(std::istream& in, fileTable& files)
@@ -271,18 +275,61 @@ void rav::printText(std::istream& in, std::ostream& out, const fileTable& files)
 void rav::createEncoding(std::istream& in, encodesTable& encodings)
 {
 }
+
 void rav::deleteEncoding(std::istream& in, encodesTable& encodings)
 {
 }
+
 void rav::encode(std::istream& in, encodesTable& encodings, fileTable& files)
 {
+  std::string textName, encodedName, encodingName;
+  in >> textName >> encodedName >> encodingName;
+
+  if (encodings.find(encodingName) == encodings.cend())
+  {
+    throw std::logic_error("No such encoding is provided");
+  }
+  if (files.find(textName) == files.cend())
+  {
+    throw std::logic_error("No such text is provided");
+  }
+  if (textName == encodedName)
+  {
+    throw std::logic_error("Names collision occured");
+  }
+
+  files.insert({encodedName, encodedName});
+  std::ifstream input(files[textName]);
+  std::ofstream output(files[encodedName]);
+  if (!input.is_open() || output.is_open())
+  {
+    throw std::logic_error("Couldn't open files");
+  }
+  encodeAndWrite(encodings[encodedName], input, output);
 }
+
 void rav::decode(std::istream& in, encodesTable& encodings, fileTable& files)
 {
+  std::string textName, encodedName, encodingName;
+  in >> textName >> encodedName >> encodingName;
 }
+
 void rav::addEncoding(std::istream& in, encodesTable& encodings)
 {
+  std::string encodingName, fileName;
+  in >> encodingName >> fileName;
+  if (encodings.find(encodingName) != encodings.cend())
+  {
+    throw std::logic_error("Such encoding already exists");
+  }
+  std::ifstream input(fileName);
+  if (!input.is_open())
+  {
+    throw std::logic_error("Couldn't open file");
+  }
+  readEncoding(input, encodings[encodingName]);
 }
+
 void rav::saveEncoding(std::istream& in, encodesTable& encodings)
 {
 }

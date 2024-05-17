@@ -50,6 +50,10 @@ int main(int argc, char* argv[])
     {
       commands.at(cmd)(std::cin);
     }
+    catch (const std::out_of_range& e)
+    {
+      std::cout << "<INVALID_COMMAND>\n";
+    }
     catch (const std::logic_error &e)
     {
       std::cout << e.what() << "\n";
