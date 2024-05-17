@@ -8,7 +8,7 @@ namespace ravinskij
 {
     void printHelp();
 
-    using fileTable = std::multimap<std::string, std::string>;
+    using fileTable = std::map<std::string, std::string>;
     void addText(std::istream&, fileTable&);
     void saveText(std::istream&, fileTable&);
     void deleteText(std::istream&, fileTable&);

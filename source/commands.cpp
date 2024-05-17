@@ -186,7 +186,7 @@ void copyFile(std::ifstream& in, std::ostream& out)
 void rav::addText(std::istream& in, fileTable& files)
 {
   std::string textName, fileName;
-  in >> fileName >> fileName;
+  in >> textName >> fileName;
 
   if (files.find(textName) != files.cend())
   {
@@ -201,6 +201,10 @@ void rav::addText(std::istream& in, fileTable& files)
   copyFile(input, std::cout);
   files.insert({textName, fileName});
   input.close();
+  for (auto it = files.cbegin(); it != files.cend(); it++)
+  {
+    std::cout << it->first << ' ' << it->second << '\n';
+  }
 }
 
 void rav::saveText(std::istream& in, fileTable& files)
@@ -213,7 +217,7 @@ void rav::saveText(std::istream& in, fileTable& files)
   }
   std::ifstream input(files.find(textName)->second);
   std::ofstream output(fileName);
-  if (!input.is_open() || output.is_open())
+  if (!input.is_open() || !output.is_open())
   {
     throw std::logic_error("Couldn't open file");
   }
@@ -226,7 +230,7 @@ void rav::deleteText(std::istream& in, fileTable& files)
 {
   std::string textName;
   in >> textName;
-  if (files.find(textName) != files.cend())
+  if (files.find(textName) == files.cend())
   {
     throw std::logic_error("Requested text is not found");
   }
@@ -248,8 +252,6 @@ void rav::printText(std::istream& in, std::ostream& out, const fileTable& files)
   }
   copyFile(input, out);
 }
-
-
 
 void rav::createEncoding(std::istream& in, encodesTable& encodings)
 {
