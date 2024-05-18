@@ -352,19 +352,25 @@ std::ostream& operator<<(std::ostream& out, const std::vector< bool >& code)
   return out;
 }
 
-std::istream& operator>>(std::istream& in, std::vector< bool >& code)
-{
-  std::istream::sentry sentry(in);
-  if (!sentry)
-  {
-    return in;
-  }
 
-  while(in.peek() != '\n')
-  {
-    code.push_back(in.get());
-  }
-  return in;
+std::istream& operator>>(std::istream& in, std::vector<bool>& code)
+{
+    std::istream::sentry sentry(in);
+    if (!in)
+    {
+        return in;
+    }
+    
+    in >> std::noskipws;
+    char bit = 0;
+    while (bit != '\n')
+    {
+        in >> bit;
+        code.push_back(bit - '0');
+    }
+    code.pop_back();
+    in >> std::skipws;
+    return in;
 }
 
 void rav::addEncoding(std::istream& in, encodesTable& encodings)
@@ -380,12 +386,12 @@ void rav::addEncoding(std::istream& in, encodesTable& encodings)
   {
     throw std::logic_error("Couldn't open file");
   }
-  input >> encodingName;
-  char ch = 0;
-  std::vector<bool> code;
+  //input >> encodingName;
   rav::encodeMap map;
   while (!input.eof())
   {
+    char ch = 0;
+    std::vector<bool> code;
     input.get(ch);
     input >> code;
     std::cout << ch << ' ' << code << '\n';
@@ -405,7 +411,7 @@ void rav::saveEncoding(std::istream& in, encodesTable& encodings)
   std::ofstream output(fileName);
   for (auto mapIt = encodings.cbegin(); mapIt != encodings.cend(); ++mapIt)
   {
-    output << mapIt->first << '\n';
+    //output << mapIt->first << '\n';
     for (auto it = mapIt->second.cbegin(); it != mapIt->second.cend(); ++it)
     {
       output << it->first << ' ' << it->second << '\n';
