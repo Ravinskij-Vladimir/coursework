@@ -18,7 +18,7 @@ namespace ravinskij
 
     using encodeMap = std::map<char, std::vector<bool>>;
     using encodesTable = std::map<std::string, encodeMap>;
-    void createEncoding(std::istream&, encodesTable&, traverserTable&);
+    void createEncoding(std::istream&, encodesTable&, traverserTable&, const fileTable&);
     void deleteEncoding(std::istream&, encodesTable&, traverserTable&);
     void encode(std::istream&, const encodesTable&, fileTable&);
     void decode(std::istream&, const traverserTable&, fileTable&);

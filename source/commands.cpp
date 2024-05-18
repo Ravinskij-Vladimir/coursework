@@ -29,15 +29,15 @@ void rav::printHelp()
   std::cout << "\nComparing encodings:\n";
   std::cout << "\tcompare-encodings <text-name> <encoding-name-1> <encoding-name-2> <...> <encoding-name-N>\t";
 
-  std::cout << "\n\nDescrption:\n";
+  std::cout << "\n\nDescription:\n";
   std::cout << "\tadd-text\t add text to work with\n";
   std::cout << "\tsave-text\t write text to the file (content of the file will be overwritten)\n";
   std::cout << "\tdelete-text\t delete text to work with\n";
   std::cout << "\tprint-text\t print the text to the console\n";
   std::cout << "\tcreate-encoding\t create encoding table in accordance with the text\n";
   std::cout << "\tdelete-encoding\t delete encoding table to work with\n";
-  std::cout << "\tencode\t encode the text in accordance with the encoding table\n";
-  std::cout << "\tdecode\t decode the text in accordance with the encoding table\n";
+  std::cout << "\tencode\t\t encode the text in accordance with the encoding table\n";
+  std::cout << "\tdecode\t\t decode the text in accordance with the encoding table\n";
   std::cout << "\tadd-encoding\t add the encoding table from the file in the format 'symbol - binary code'\n";
   std::cout << "\tsave-encoding\t save the encoding table to the file in the format 'symbol - binary code'\n";
   std::cout << "\tcompare-encodings\t Compares encodings applied to the same text.\n";
@@ -246,16 +246,16 @@ void rav::printText(std::istream& in, std::ostream& out, const fileTable& files)
   copyFile(input, out);
 }
 
-void rav::createEncoding(std::istream& in, encodesTable& encodings, traverserTable& traverses)
+void rav::createEncoding(std::istream& in, encodesTable& encodings, traverserTable& traverses, const fileTable& files)
 {
-  std::string fileName, encodingName;
-  in >> fileName >> encodingName;
+  std::string textName, encodingName;
+  in >> textName >> encodingName;
   if (encodings.find(encodingName) != encodings.cend())
   {
     throw std::logic_error("Such encoding already exists");
   }
 
-  std::ifstream input(fileName);
+  std::ifstream input(files.at(textName));
   if (!input.is_open())
   {
     throw std::logic_error("Couldn't open file");
@@ -281,6 +281,14 @@ void rav::createEncoding(std::istream& in, encodesTable& encodings, traverserTab
 
 void rav::deleteEncoding(std::istream& in, encodesTable& encodings, traverserTable& traverses)
 {
+  std::string encodingName;
+  in >> encodingName;
+  if (encodings.find(encodingName) == encodings.cend())
+  {
+    throw std::logic_error("No such encoding is provided");
+  }
+  encodings.erase(encodingName);
+  traverses.erase(encodingName);
 }
 
 void rav::encode(std::istream& in, const encodesTable& encodings, fileTable& files)
@@ -302,13 +310,13 @@ void rav::encode(std::istream& in, const encodesTable& encodings, fileTable& fil
   }
 
   std::ifstream input(files[textName]);
-  std::ofstream output(files[encodedName]);
-  if (!input.is_open() || output.is_open())
+  files.insert({encodedName, encodedName});
+  std::ofstream output(files[encodedName], std::ios::out | std::ios::binary);
+  if (!input.is_open() || !output.is_open())
   {
     throw std::logic_error("Couldn't open files");
   }
   encodeAndWrite(encodings.find(encodingName)->second, input, output);
-  files.insert({encodedName, encodedName});
 }
 
 void rav::decode(std::istream& in, const traverserTable& traverses, fileTable& files)
@@ -323,7 +331,7 @@ void rav::decode(std::istream& in, const traverserTable& traverses, fileTable& f
   {
     throw std::logic_error("No such encoding is provided");
   }
-  std::ifstream input(files.at(textName));
+  std::ifstream input(files.at(textName), std::ios::in | std::ios::binary);
   std::ofstream output(decodedName);
   if (!input.is_open() || !output.is_open())
   {
@@ -331,6 +339,7 @@ void rav::decode(std::istream& in, const traverserTable& traverses, fileTable& f
   }
   std::list<rav::Node*> traverser = traverses.find(encodingName)->second;
   decodeAndWrite(traverser, input, output);
+  files.insert({decodedName, decodedName});
 }
 
 void rav::addEncoding(std::istream& in, encodesTable& encodings)

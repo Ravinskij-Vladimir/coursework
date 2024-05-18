@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
     commands["save-text"] = std::bind(ravinskij::saveText, _1, std::ref(files));
     commands["delete-text"] = std::bind(ravinskij::deleteText, _1, std::ref(files));
     commands["print-text"] = std::bind(ravinskij::printText, _1, std::ref(std::cout), std::cref(files));
-    commands["create-encoding"] = std::bind(ravinskij::createEncoding, _1, std::ref(table), std::ref(traverses));
+    commands["create-encoding"] = std::bind(ravinskij::createEncoding, _1, std::ref(table), std::ref(traverses), std::cref(files));
     commands["delete-encoding"] = std::bind(ravinskij::deleteEncoding, _1, std::ref(table), std::ref(traverses));
     commands["encode"] = std::bind(ravinskij::encode, _1, std::cref(table), std::ref(files));
     commands["decode"] = std::bind(ravinskij::decode, _1, std::cref(traverses), std::ref(files));
