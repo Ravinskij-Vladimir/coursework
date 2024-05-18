@@ -2,12 +2,14 @@
 #define COMMANDS_HPP
 #include <iosfwd>
 #include <map>
-#include <map>
+#include <list>
 #include <vector>
+#include "Node.hpp"
 namespace ravinskij
 {
     void printHelp();
 
+    using traverserTable = std::map<std::string, std::list<Node *>>;
     using fileTable = std::map<std::string, std::string>;
     void addText(std::istream&, fileTable&);
     void saveText(std::istream&, fileTable&);
@@ -16,10 +18,10 @@ namespace ravinskij
 
     using encodeMap = std::map<char, std::vector<bool>>;
     using encodesTable = std::map<std::string, encodeMap>;
-    void createEncoding(std::istream&, encodesTable&);
-    void deleteEncoding(std::istream&, encodesTable&);
+    void createEncoding(std::istream&, encodesTable&, traverserTable&);
+    void deleteEncoding(std::istream&, encodesTable&, traverserTable&);
     void encode(std::istream&, const encodesTable&, fileTable&);
-    void decode(std::istream&, const encodesTable&, fileTable&);
+    void decode(std::istream&, const traverserTable&, fileTable&);
     void addEncoding(std::istream&, encodesTable&);
     void saveEncoding(std::istream&, encodesTable&);
 
