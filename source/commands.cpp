@@ -3,6 +3,7 @@
 #include <fstream>
 #include <list>
 #include <stdexcept>
+#include <limits>
 #include "Node.hpp"
 
 namespace rav = ravinskij;
@@ -51,8 +52,6 @@ constexpr int bitsInByte()
   return 8;
 }
 
-
-
 void readAlphabet(std::istream &input, std::map<char, int> &alphabet)
 {
   char c = 0;
@@ -64,10 +63,6 @@ void readAlphabet(std::istream &input, std::map<char, int> &alphabet)
 
   input.clear();
   input.seekg(0); // перемещаем указатель снова в начало файла
-}
-
-void readEncoding(std::istream& in, rav::encodeMap& encoding)
-{
 }
 
 void buildHuffmanTree(std::list<rav::Node *> &lst, const std::map<char, int> &alphabet, rav::NodeComparator comp)
@@ -342,6 +337,36 @@ void rav::decode(std::istream& in, const traverserTable& traverses, fileTable& f
   files.insert({decodedName, decodedName});
 }
 
+std::ostream& operator<<(std::ostream& out, const std::vector< bool >& code)
+{
+  std::ostream::sentry sentry(out);
+  if (!sentry)
+  {
+    return out;
+  }
+
+  for (bool bit: code)
+  {
+    out << bit;
+  }
+  return out;
+}
+
+std::istream& operator>>(std::istream& in, std::vector< bool >& code)
+{
+  std::istream::sentry sentry(in);
+  if (!sentry)
+  {
+    return in;
+  }
+
+  while(in.peek() != '\n')
+  {
+    code.push_back(in.get());
+  }
+  return in;
+}
+
 void rav::addEncoding(std::istream& in, encodesTable& encodings)
 {
   std::string encodingName, fileName;
@@ -355,19 +380,37 @@ void rav::addEncoding(std::istream& in, encodesTable& encodings)
   {
     throw std::logic_error("Couldn't open file");
   }
-  readEncoding(input, encodings[encodingName]);
+  input >> encodingName;
+  char ch = 0;
+  std::vector<bool> code;
+  rav::encodeMap map;
+  while (!input.eof())
+  {
+    input.get(ch);
+    input >> code;
+    std::cout << ch << ' ' << code << '\n';
+    map.insert({ch, code});
+  }
+  encodings.insert({encodingName, map});
 }
 
 void rav::saveEncoding(std::istream& in, encodesTable& encodings)
 {
-  // std::string encodingName, fileName;
-  // in >> encodingName >> fileName;
-  // if (encodings.find(encodingName) == encodings.cend())
-  // {
-  //   throw std::logic_error("No such encoding is provided");
-  // }
-  // std::ofstream output(fileName);
-  // for (auto it = encodings.cbegin())
+  std::string encodingName, fileName;
+  in >> encodingName >> fileName;
+  if (encodings.find(encodingName) == encodings.cend())
+  {
+    throw std::logic_error("No such encoding is provided");
+  }
+  std::ofstream output(fileName);
+  for (auto mapIt = encodings.cbegin(); mapIt != encodings.cend(); ++mapIt)
+  {
+    output << mapIt->first << '\n';
+    for (auto it = mapIt->second.cbegin(); it != mapIt->second.cend(); ++it)
+    {
+      output << it->first << ' ' << it->second << '\n';
+    }
+  }
 }
 
 void rav::compareEncodings(std::istream& in, const encodesTable& encodings)
