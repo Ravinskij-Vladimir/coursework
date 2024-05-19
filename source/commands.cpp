@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <limits>
 #include "Node.hpp"
+#include "codeWrappers.hpp"
 
 namespace rav = ravinskij;
 
@@ -117,6 +118,10 @@ void encodeAndWrite(const rav::encodeMap &table, std::istream &input, std::ostre
   while (!input.eof())
   {
     char c = input.get();
+    if (c == EOF)
+    {
+      break;
+    }
     std::vector<bool> x = table.at(c);
     for (size_t n = 0; n < x.size(); n++)
     {
@@ -337,41 +342,6 @@ void rav::decode(std::istream& in, const traverserTable& traverses, fileTable& f
   files.insert({decodedName, decodedName});
 }
 
-std::ostream& operator<<(std::ostream& out, const std::vector< bool >& code)
-{
-  std::ostream::sentry sentry(out);
-  if (!sentry)
-  {
-    return out;
-  }
-
-  for (bool bit: code)
-  {
-    out << bit;
-  }
-  return out;
-}
-
-
-std::istream& operator>>(std::istream& in, std::vector<bool>& code)
-{
-    std::istream::sentry sentry(in);
-    if (!in)
-    {
-        return in;
-    }
-    
-    in >> std::noskipws;
-    char bit = 0;
-    while (bit != '\n')
-    {
-        in >> bit;
-        code.push_back(bit - '0');
-    }
-    code.pop_back();
-    in >> std::skipws;
-    return in;
-}
 
 void rav::addEncoding(std::istream& in, encodesTable& encodings)
 {
@@ -392,9 +362,8 @@ void rav::addEncoding(std::istream& in, encodesTable& encodings)
   {
     char ch = 0;
     std::vector<bool> code;
-    input.get(ch);
-    input >> code;
-    std::cout << ch << ' ' << code << '\n';
+    input >> ReadWrapper{ch, code};
+    std::cout << WriteWrapper{ch, code} <<  '\n';
     map.insert({ch, code});
   }
   encodings.insert({encodingName, map});
@@ -414,7 +383,7 @@ void rav::saveEncoding(std::istream& in, encodesTable& encodings)
     //output << mapIt->first << '\n';
     for (auto it = mapIt->second.cbegin(); it != mapIt->second.cend(); ++it)
     {
-      output << it->first << ' ' << it->second << '\n';
+      output << WriteWrapper{it->first, it->second} << '\n';
     }
   }
 }
