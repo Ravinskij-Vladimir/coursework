@@ -28,8 +28,9 @@ std::istream& rav::operator>>(std::istream& in, rav::ReadWrapper&& wrapper)
         return in;
     }
 
+    using del = CharDelimeter;
     in >> std::noskipws;
-    in >> wrapper.symbol >> CharDelimeter{'-'};
+    in >> del{'"'} >> wrapper.symbol >> del{'"'} >> del{'-'};
     if (!in)
     {
         return in;
