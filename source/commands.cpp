@@ -280,15 +280,7 @@ void rav::createEncoding(std::istream& in, encodesTable& encodings, traverserTab
   traverses.insert({encodingName, tree});
   rav::Node* root = tree.front();
   std::vector<bool> code;
-  try 
-  {
-    buildTable(root, code, encodings[encodingName]);
-  }
-  catch (...)
-  {
-    input.close();
-    throw;
-  }
+  buildTable(root, code, encodings[encodingName]);
 }
 
 void rav::deleteEncoding(std::istream& in, encodesTable& encodings, traverserTable& traverses)
