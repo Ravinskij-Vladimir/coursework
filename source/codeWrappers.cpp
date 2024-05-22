@@ -36,7 +36,7 @@ std::istream& rav::operator>>(std::istream& in, rav::ReadWrapper&& wrapper)
         return in;
     }
     char bit = 0;
-    while (bit != '\n')
+    while (in && bit != '\n')
     {
         in >> bit;
         wrapper.code.push_back(static_cast<bool>(bit - '0'));

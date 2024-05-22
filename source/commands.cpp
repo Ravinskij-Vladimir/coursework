@@ -383,18 +383,19 @@ void rav::saveEncoding(std::istream& in, encodesTable& encodings)
 {
   std::string encodingName, fileName;
   in >> encodingName >> fileName;
-  if (encodings.find(encodingName) == encodings.cend())
+  auto currEncoding = encodings.find(encodingName);
+  if (currEncoding == encodings.cend())
   {
     throw std::logic_error("No such encoding is provided");
   }
   std::ofstream output(fileName);
-  for (auto mapIt = encodings.cbegin(); mapIt != encodings.cend(); ++mapIt)
+  auto beginIt = currEncoding->second.cbegin();
+  auto endIt = currEncoding->second.cend();
+  output << WriteWrapper{beginIt->first, beginIt->second};
+  ++beginIt;
+  for (auto it = beginIt; it != endIt; ++it)
   {
-    //output << mapIt->first << '\n';
-    for (auto it = mapIt->second.cbegin(); it != mapIt->second.cend(); ++it)
-    {
-      output << WriteWrapper{it->first, it->second} << '\n';
-    }
+    output << '\n' << WriteWrapper{it->first, it->second};
   }
 }
 
