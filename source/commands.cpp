@@ -403,8 +403,7 @@ void rav::saveEncoding(std::istream& in, encodesTable& encodings)
 
 double getCompessionPercentage(size_t oldSize, size_t newSize)
 {
-  std::cout << oldSize << ' ' << newSize << '\n';
-  return (oldSize - newSize) / oldSize;
+  return static_cast<double>((oldSize - newSize)) / oldSize;
 }
 
 void rav::compareEncodings(std::istream& in, const fileTable& files, const encodesTable& encodings)
@@ -448,7 +447,6 @@ void rav::compareEncodings(std::istream& in, const fileTable& files, const encod
     encodeAndWrite(encodings.find(arg)->second, file, out);
     out.close();
     size_t compressedSize = getFileSize(arg);
-    std::cout << fileSize << ' ' << compressedSize << '\n';
     std::cout << arg << ' ' << compressedSize << ' ' << getCompessionPercentage(fileSize, compressedSize) << '\n';
   }
   //encodeMap encode = encodings.at(encoding);
