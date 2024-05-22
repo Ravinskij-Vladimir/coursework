@@ -4,9 +4,11 @@
 #include <list>
 #include <stdexcept>
 #include <limits>
+#include <iomanip>
 #include "Node.hpp"
 #include "scopeGuard.hpp"
 #include "codeWrappers.hpp"
+#include "delimeter.hpp"
 
 namespace rav = ravinskij;
 
@@ -50,7 +52,7 @@ void rav::printHelp()
 }
 
 
-std::ifstream::pos_type filesize(const char* filename)
+std::ifstream::pos_type getFileSize(const std::string filename)
 {
     std::ifstream in(filename, std::ios::ate | std::ios::binary);
     return in.tellg(); 
@@ -399,9 +401,55 @@ void rav::saveEncoding(std::istream& in, encodesTable& encodings)
   }
 }
 
-void rav::compareEncodings(std::istream& in, const encodesTable& encodings)
+double getCompessionPercentage(size_t oldSize, size_t newSize)
 {
-  std::string encoding;
-  in >> encoding;
-  encodeMap encode = encodings.at(encoding);
+  std::cout << oldSize << ' ' << newSize << '\n';
+  return (oldSize - newSize) / oldSize;
+}
+
+void rav::compareEncodings(std::istream& in, const fileTable& files, const encodesTable& encodings)
+{
+  std::string arg;
+  std::list<std::string> args;
+  ScopeGuard guard(in);
+  in >> std::noskipws;
+  char delim = 0;
+  in >> delim;
+  while (in && delim != '\n')
+  {
+    in >> arg >> delim;
+    if (in)
+    {
+      args.push_back(arg);
+    }
+  }
+  if (args.empty())
+  {
+    throw std::logic_error("No arguments are provided");
+  }
+  std::string fileName = args.front();
+  args.pop_front();
+  if (files.find(fileName) == files.cend())
+  {
+    throw std::logic_error("No such file is provided");
+  }
+  std::cout << getFileSize(files.find(fileName)->second) << '\n';
+  std::ifstream file(files.find(fileName)->second);
+  std::cout << std::fixed << std::setprecision(2);
+  size_t fileSize = getFileSize(files.find(fileName)->second);
+  std::cout << fileName << ' ' << fileSize << ' ' << getCompessionPercentage(fileSize, fileSize) << '\n';
+  for (const auto& arg: args)
+  {
+    if (encodings.find(arg) == encodings.cend())
+    {
+      throw std::logic_error("No such encoding is provided");
+    }
+    std::ofstream out(arg, std::ios::binary);
+    encodeAndWrite(encodings.find(arg)->second, file, out);
+    out.close();
+    size_t compressedSize = getFileSize(arg);
+    std::cout << fileSize << ' ' << compressedSize << '\n';
+    std::cout << arg << ' ' << compressedSize << ' ' << getCompessionPercentage(fileSize, compressedSize) << '\n';
+  }
+  //encodeMap encode = encodings.at(encoding);
 }

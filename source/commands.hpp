@@ -25,7 +25,7 @@ namespace ravinskij
     void addEncoding(std::istream&, encodesTable&);
     void saveEncoding(std::istream&, encodesTable&);
 
-    void compareEncodings(std::istream&, const encodesTable&);
+    void compareEncodings(std::istream&, const fileTable&, const encodesTable&);
 }
 
 #endif
