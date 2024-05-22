@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <limits>
 #include "Node.hpp"
+#include "scopeGuard.hpp"
 #include "codeWrappers.hpp"
 
 namespace rav = ravinskij;
@@ -48,6 +49,13 @@ void rav::printHelp()
   std::cout << "(for the source text, the text name is displayed instead of the encoding).\n";
 }
 
+
+std::ifstream::pos_type filesize(const char* filename)
+{
+    std::ifstream in(filename, std::ios::ate | std::ios::binary);
+    return in.tellg(); 
+}
+
 constexpr int bitsInByte()
 {
   return 8;
@@ -55,10 +63,12 @@ constexpr int bitsInByte()
 
 void readAlphabet(std::istream &input, std::map<char, int> &alphabet)
 {
+  rav::ScopeGuard guard(input);
+  input >> std::noskipws;
   char c = 0;
   while (!input.eof())
   {
-    c = input.get();
+    input >> c;
     alphabet[c]++;
   }
 
@@ -390,4 +400,7 @@ void rav::saveEncoding(std::istream& in, encodesTable& encodings)
 
 void rav::compareEncodings(std::istream& in, const encodesTable& encodings)
 {
+  std::string encoding;
+  in >> encoding;
+  encodeMap encode = encodings.at(encoding);
 }

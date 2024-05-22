@@ -11,7 +11,8 @@ std::ostream& rav::operator<<(std::ostream& out, rav::WriteWrapper&& wrapper)
     {
         return out;
     }
-    out << wrapper.symbol << '-';
+    
+    out << '"' << wrapper.symbol << '"' << '-';
     for (bool bit: wrapper.code)
     {
         out << bit;
@@ -26,10 +27,14 @@ std::istream& rav::operator>>(std::istream& in, rav::ReadWrapper&& wrapper)
     {
         return in;
     }
-    wrapper.symbol = in.get();
-    in >> CharDelimeter{'-'};
-    char bit = 0;
+
     in >> std::noskipws;
+    in >> wrapper.symbol >> CharDelimeter{'-'};
+    if (!in)
+    {
+        return in;
+    }
+    char bit = 0;
     while (bit != '\n')
     {
         in >> bit;
