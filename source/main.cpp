@@ -66,6 +66,9 @@ int main(int argc, char* argv[])
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
   }
-
+  // for (auto it = traverses.begin(); it != traverses.end(); ++it)
+  // {
+  //   delete it->second.front();
+  // }
   return 0;
 }

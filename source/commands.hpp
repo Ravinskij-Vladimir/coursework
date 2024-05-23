@@ -4,12 +4,14 @@
 #include <map>
 #include <list>
 #include <vector>
+#include <memory>
 #include "Node.hpp"
+
 namespace ravinskij
 {
     void printHelp();
 
-    using traverserTable = std::map<std::string, std::list<Node *>>;
+    using traverserTable = std::map<std::string, std::list<nodePtr>>;
     using fileTable = std::map<std::string, std::string>;
     void addText(std::istream&, fileTable&);
     void saveText(std::istream&, fileTable&);
