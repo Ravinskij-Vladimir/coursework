@@ -149,6 +149,8 @@ void encodeAndWrite(const rav::encodeMap &table, std::istream &input, std::ostre
       }
     }
   }
+  output << buf;
+  //output << 0 << 0;
 }
 
 void decodeAndWrite(const std::list<rav::nodePtr>& travers, std::istream &input, std::ostream &output)
@@ -156,8 +158,10 @@ void decodeAndWrite(const std::list<rav::nodePtr>& travers, std::istream &input,
   rav::nodePtr root = travers.front();
   rav::nodePtr traverser = root;
   int position = 0;
-  char byte;
-  byte = input.get();
+  char byte = 0;
+  rav::ScopeGuard guard(input);
+  input >> std::noskipws;
+  input >> byte;
   while (!input.eof())
   {
     bool checkedBitState = byte & (1 << (bitsInByte() - 1 - position));
@@ -174,7 +178,7 @@ void decodeAndWrite(const std::list<rav::nodePtr>& travers, std::istream &input,
     if (position == bitsInByte())
     {
       position = 0;
-      byte = input.get();
+      input >> byte;
     }
   }
   output << '\n';
