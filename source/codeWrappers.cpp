@@ -17,6 +17,7 @@ std::ostream& rav::operator<<(std::ostream& out, rav::WriteWrapper&& wrapper)
     {
         out << bit;
     }
+    out << ' ' << wrapper.frequency;
     return out;
 }
 
@@ -36,12 +37,13 @@ std::istream& rav::operator>>(std::istream& in, rav::ReadWrapper&& wrapper)
         return in;
     }
     char bit = 0;
-    while (in && bit != '\n')
+    while (in && bit != ' ')
     {
         in >> bit;
         wrapper.code.push_back(static_cast<bool>(bit - '0'));
     }
     wrapper.code.pop_back();
+    in >> wrapper.frequency;
     in >> std::skipws;
     return in;
 }

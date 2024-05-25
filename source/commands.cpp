@@ -149,7 +149,10 @@ void encodeAndWrite(const rav::encodeMap &table, std::istream &input, std::ostre
       }
     }
   }
-  output << buf;
+  if (position != 0)
+  {
+    output << buf;
+  }
   //output << 0 << 0;
 }
 
@@ -181,7 +184,6 @@ void decodeAndWrite(const std::list<rav::nodePtr>& travers, std::istream &input,
       input >> byte;
     }
   }
-  output << '\n';
 }
 
 void copyFile(std::ifstream& in, std::ostream& out)
@@ -233,8 +235,8 @@ void rav::saveText(std::istream& in, fileTable& files)
     throw std::logic_error("Couldn't open file");
   }
   copyFile(input, output);
-  input.close();
-  output.close();
+  // input.close();
+  // output.close();
 }
 
 void rav::deleteText(std::istream& in, fileTable& files)
@@ -353,7 +355,7 @@ void rav::decode(std::istream& in, const traverserTable& traverses, fileTable& f
 }
 
 
-void rav::addEncoding(std::istream& in, encodesTable& encodings)
+void rav::addEncoding(std::istream& in, encodesTable& encodings, traverserTable& traverses)
 {
   std::string encodingName, fileName;
   in >> encodingName >> fileName;
@@ -372,14 +374,15 @@ void rav::addEncoding(std::istream& in, encodesTable& encodings)
   {
     char ch = 0;
     std::vector<bool> code;
-    input >> ReadWrapper{ch, code};
-    std::cout << WriteWrapper{ch, code} <<  '\n';
+    size_t freq;
+    input >> ReadWrapper{ch, code, freq};
+    std::cout << WriteWrapper{ch, code, freq} <<  '\n';
     map.insert({ch, code});
   }
   encodings.insert({encodingName, map});
 }
 
-void rav::saveEncoding(std::istream& in, encodesTable& encodings)
+void rav::saveEncoding(std::istream& in, const encodesTable& encodings, const traverserTable& traverses)
 {
   std::string encodingName, fileName;
   in >> encodingName >> fileName;
@@ -391,11 +394,12 @@ void rav::saveEncoding(std::istream& in, encodesTable& encodings)
   std::ofstream output(fileName);
   auto beginIt = currEncoding->second.cbegin();
   auto endIt = currEncoding->second.cend();
-  output << WriteWrapper{beginIt->first, beginIt->second};
+  size_t freq = 0;
+  output << WriteWrapper{beginIt->first, beginIt->second, freq};
   ++beginIt;
   for (auto it = beginIt; it != endIt; ++it)
   {
-    output << '\n' << WriteWrapper{it->first, it->second};
+    output << '\n' << WriteWrapper{it->first, it->second, freq};
   }
 }
 
