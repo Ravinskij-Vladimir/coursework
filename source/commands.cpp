@@ -413,12 +413,21 @@ void rav::saveEncoding(std::istream& in, const encodesTable& encodings, const tr
   std::ofstream output(fileName);
   auto beginIt = currEncoding->second.cbegin();
   auto endIt = currEncoding->second.cend();
-  size_t freq = 0;
-  output << WriteWrapper{beginIt->first, beginIt->second, freq};
+  std::vector< size_t > frequencies;
+  auto root = traverses.find(encodingName)->second.front();
+  for (auto it = beginIt; it != endIt; ++it)
+  {
+    auto traverser = root;
+    frequencies.push_back(getFrequency(traverser, it->first, it->second));
+  }
+
+  output << WriteWrapper{beginIt->first, beginIt->second, frequencies[0]};
+  frequencies.pop_back();
   ++beginIt;
   for (auto it = beginIt; it != endIt; ++it)
   {
-    output << '\n' << WriteWrapper{it->first, it->second, freq};
+    output << '\n' << WriteWrapper{it->first, it->second, frequencies[0]};
+    frequencies.pop_back();
   }
 }
 
