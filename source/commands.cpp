@@ -65,7 +65,7 @@ constexpr int bitsInByte()
   return 8;
 }
 
-void readAlphabet(std::istream &input, std::map<char, int> &alphabet)
+void readAlphabet(std::istream &input, std::map< char, size_t > &alphabet)
 {
   rav::ScopeGuard guard(input);
   input >> std::noskipws;
@@ -80,7 +80,7 @@ void readAlphabet(std::istream &input, std::map<char, int> &alphabet)
   input.seekg(0); // перемещаем указатель снова в начало файла
 }
 
-void buildHuffmanTree(std::list<rav::nodePtr> &lst, const std::map<char, int> &alphabet, rav::NodeComparator comp)
+void buildHuffmanTree(std::list<rav::nodePtr> &lst, const std::map< char, size_t > &alphabet, rav::NodeComparator comp)
 {
   for (auto itr = alphabet.cbegin(); itr != alphabet.cend(); ++itr)
   {
@@ -281,7 +281,7 @@ void rav::createEncoding(std::istream& in, encodesTable& encodings, traverserTab
     throw std::logic_error("Couldn't open file");
   }
 
-  std::map<char, int> alphabet;
+  std::map< char, size_t > alphabet;
   readAlphabet(input, alphabet);
   std::list<nodePtr> tree;
   buildHuffmanTree(tree, alphabet, rav::NodeComparator());
@@ -370,16 +370,35 @@ void rav::addEncoding(std::istream& in, encodesTable& encodings, traverserTable&
   }
   //input >> encodingName;
   rav::encodeMap map;
+  std::map < char, size_t > alphabet;
   while (!input.eof())
   {
     char ch = 0;
     std::vector<bool> code;
-    size_t freq;
+    size_t freq = 0;
     input >> ReadWrapper{ch, code, freq};
     std::cout << WriteWrapper{ch, code, freq} <<  '\n';
     map.insert({ch, code});
+    alphabet.insert({ch, freq});
   }
   encodings.insert({encodingName, map});
+  std::list< rav::nodePtr > newTraverser;
+  buildHuffmanTree(newTraverser, alphabet, rav::NodeComparator{});
+  traverses.insert({encodingName, newTraverser});
+}
+
+size_t getFrequency(rav::nodePtr& root, char symbol, const std::vector< bool >& code)
+{
+  rav::nodePtr traverser = root;
+  for (auto it: code)
+  {
+    if (root == nullptr)
+    {
+      return 0;
+    }
+    root = (it == 0 ? root->left : root->right);
+  }
+  return root->frequency;
 }
 
 void rav::saveEncoding(std::istream& in, const encodesTable& encodings, const traverserTable& traverses)
