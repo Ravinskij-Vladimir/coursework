@@ -387,7 +387,7 @@ void rav::addEncoding(std::istream& in, encodesTable& encodings, traverserTable&
   traverses.insert({encodingName, newTraverser});
 }
 
-size_t getFrequency(rav::nodePtr& root, char symbol, const std::vector< bool >& code)
+size_t getFrequency(rav::nodePtr& root, const std::vector< bool >& code)
 {
   rav::nodePtr traverser = root;
   for (auto it: code)
@@ -418,7 +418,7 @@ void rav::saveEncoding(std::istream& in, const encodesTable& encodings, const tr
   for (auto it = beginIt; it != endIt; ++it)
   {
     auto traverser = root;
-    frequencies.push_back(getFrequency(traverser, it->first, it->second));
+    frequencies.push_back(getFrequency(traverser, it->second));
   }
 
   output << WriteWrapper{beginIt->first, beginIt->second, frequencies.front()};
@@ -464,6 +464,9 @@ void rav::compareEncodings(std::istream& in, const fileTable& files, const encod
   }
   std::cout << getFileSize(files.find(fileName)->second) << '\n';
   std::ifstream file(files.find(fileName)->second);
+
+  ScopeGuard outGuard(std::cout);
+
   std::cout << std::fixed << std::setprecision(2);
   size_t fileSize = getFileSize(files.find(fileName)->second);
   std::cout << fileName << ' ' << fileSize << ' ' << getCompessionPercentage(fileSize, fileSize) << '\n';
@@ -479,5 +482,19 @@ void rav::compareEncodings(std::istream& in, const fileTable& files, const encod
     size_t compressedSize = getFileSize(arg);
     std::cout << arg << ' ' << compressedSize << ' ' << getCompessionPercentage(fileSize, compressedSize) << '\n';
   }
-  //encodeMap encode = encodings.at(encoding);
+}
+
+void rav::printFiles(std::istream&, const fileTable& files)
+{
+  
+}
+
+void rav::printTexts(std::istream&, const fileTable& files)
+{
+
+}
+
+void rav::printAll(std::istream&, const fileTable& files)
+{
+
 }
