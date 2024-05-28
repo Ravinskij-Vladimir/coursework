@@ -474,6 +474,21 @@ void rav::compareEncodings(std::istream& in, std::ostream& out, const fileTable&
   }
 }
 
+std::string getFirst(const std::pair< std::string, std::string >& textPair)
+{
+  return textPair.first;
+}
+
+std::string getSecond(const std::pair< std::string, std::string >& textPair)
+{
+  return textPair.second;
+}
+
+std::string getAll(const std::pair< std::string, std::string >& textPair)
+{
+  return textPair.first + " " + textPair.second;
+}
+
 void rav::printFiles(std::istream&, std::ostream& out, const fileTable& files)
 {
   if (files.empty())
@@ -481,13 +496,15 @@ void rav::printFiles(std::istream&, std::ostream& out, const fileTable& files)
     out << "<EMPTY_TEXT>\n";
     return;
   }
-  auto beginIt = files.cbegin();
-  out << beginIt->second;
-  ++beginIt;
-  for (auto it = beginIt; it != files.cend(); ++it)
-  {
-    out << ' ' << it->second;
-  }
+  // auto beginIt = files.cbegin();
+  // out << beginIt->second;
+  // ++beginIt;
+  // for (auto it = beginIt; it != files.cend(); ++it)
+  // {
+  //   out << ' ' << it->second;
+  // }
+  using output_it_t = std::ostream_iterator< std::string >;
+  std::transform(files.cbegin(), files.cend(), output_it_t{ out, " " }, getSecond);
   out << '\n';
 }
 
@@ -498,13 +515,15 @@ void rav::printTexts(std::istream&, std::ostream& out, const fileTable& files)
     out << "<EMPTY_TEXT>\n";
     return;
   }
-  auto beginIt = files.cbegin();
-  out << beginIt->first;
-  ++beginIt;
-  for (auto it = files.cbegin(); it != files.cend(); ++it)
-  {
-    out << ' ' << it->first;
-  }
+  // auto beginIt = files.cbegin();
+  // out << beginIt->first;
+  // ++beginIt;
+  // for (auto it = files.cbegin(); it != files.cend(); ++it)
+  // {
+  //   out << ' ' << it->first;
+  // }
+  using output_it_t = std::ostream_iterator< std::string >;
+  std::transform(files.cbegin(), files.cend(), output_it_t{ out, " " }, getFirst);
   out << '\n';
 }
 
@@ -515,9 +534,11 @@ void rav::printAll(std::istream&, std::ostream& out, const fileTable& files)
     out << "<EMPTY_TEXT>\n";
     return;
   }
-  for (auto it = files.cbegin(); it != files.cend(); ++it)
-  {
-    out << it->first << ' ' << it->second << '\n';
-  }
+  // for (auto it = files.cbegin(); it != files.cend(); ++it)
+  // {
+  //   out << it->first << ' ' << it->second << '\n';
+  // }
+  using output_it_t = std::ostream_iterator< std::string >;
+  std::transform(files.cbegin(), files.cend(), output_it_t{ out, " " }, getAll);
   out << '\n';
 }
