@@ -67,23 +67,30 @@ constexpr int bitsInByte()
 void readAlphabet(std::istream &input, std::map< char, size_t > &alphabet)
 {
   char c = 0;
+  rav::ScopeGuard guard(input);
+  input >> std::noskipws;
   while (!input.eof())
   {
-    c = input.get();
+    input >> c;
     alphabet[c]++;
   }
 }
 
+auto getNodePtr(const std::pair< char, size_t >& map)
+{
+  return std::make_shared< rav::Node >(map.second, map.first);
+}
+
 void buildHuffmanTree(std::list< rav::nodePtr > &lst, const std::map< char, size_t > &alphabet, rav::NodeComparator comp)
 {
-  for (auto itr = alphabet.cbegin(); itr != alphabet.cend(); ++itr)
-  {
-    rav::nodePtr p = std::make_shared< rav::Node >(itr->second, itr->first);
-    // p->symbol = itr->first;
-    // p->frequency = itr->second;
-    lst.push_back(p);
-  }
-
+  // for (auto itr = alphabet.cbegin(); itr != alphabet.cend(); ++itr)
+  // {
+  //   rav::nodePtr p = std::make_shared< rav::Node >(itr->second, itr->first);
+  //   // p->symbol = itr->first;
+  //   // p->frequency = itr->second;
+  //   lst.push_back(p);
+  // }
+  std::transform(alphabet.cbegin(), alphabet.cend(), std::back_inserter(lst), getNodePtr);
 
   while (lst.size() != 1)
   {
@@ -123,13 +130,16 @@ void encodeImpl(const rav::encodeMap &table, std::istream &input, std::ostream &
 {
   int position = 0;
   char buf = 0;
+  rav::ScopeGuard guard(input);
+  input >> std::noskipws;
+  char c = 0;
   while (!input.eof())
   {
-    char c = input.get();
-    std::vector< bool > x = table.at(c);
-    for (size_t n = 0; n < x.size(); n++)
+    input >> c;
+    std::vector< bool > temp = table.at(c);
+    for (size_t i = 0; i < temp.size(); i++)
     {
-      buf = buf | x[n] << (bitsInByte() - 1 - position);
+      buf = buf | temp[i] << (bitsInByte() - 1 - position);
       position++;
       if (position == bitsInByte())
       {
@@ -360,7 +370,6 @@ void rav::addEncoding(std::istream& in, encodesTable& encodings, traverserTable&
   traverses.insert({encodingName, newTraverser});
 }
 
-
 size_t getFrequency(rav::nodePtr root, const std::pair< char,  std::vector< bool > >& map)
 {
   const auto& code = map.second;
@@ -419,22 +428,38 @@ double getCompessionPercentage(size_t oldSize, size_t newSize)
   return static_cast<double>((oldSize - newSize)) / oldSize;
 }
 
-void rav::compareEncodings(std::istream& in, std::ostream& out, const fileTable& files, const encodesTable& encodings)
+void inputArgs(std::list< std::string >& args, std::istream& in)
 {
   std::string arg;
-  std::list<std::string> args;
-  ScopeGuard guard(in);
+  rav::ScopeGuard guard(in);
   in >> std::noskipws;
   char delim = 0;
   in >> delim;
   while (in && delim != '\n')
   {
     in >> arg >> delim;
-    if (in)
-    {
-      args.push_back(arg);
-    }
+    args.push_back(arg);
   }
+}
+
+void rav::compareEncodings(std::istream& in, std::ostream& output, const fileTable& files, const encodesTable& encodings)
+{
+  // std::list< std::string > args;
+  // std::string arg;
+  // rav::ScopeGuard guard(in);
+  // in >> std::noskipws;
+  // char delim = 0;
+  // in >> delim;
+  // while (in && delim != '\n')
+  // {
+  //   in >> arg >> delim;
+  //   if (in)
+  //   {
+  //     args.push_back(arg);
+  //   }
+  // }
+  std::list< std::string > args;
+  inputArgs(args, in);
   if (args.empty())
   {
     throw std::logic_error("No arguments are provided");
@@ -450,13 +475,13 @@ void rav::compareEncodings(std::istream& in, std::ostream& out, const fileTable&
   {
     throw std::logic_error("No such file is provided");
   }
-  //out << getFileSize(files.find(fileName)->second) << '\n';
+  //output << getFileSize(files.find(fileName)->second) << '\n';
   std::ifstream file(files.find(fileName)->second);
-  ScopeGuard outGuard(out);
+  ScopeGuard outGuard(output);
 
-  out << std::fixed << std::setprecision(2);
+  output << std::fixed << std::setprecision(2);
   size_t fileSize = getFileSize(files.find(fileName)->second);
-  out << fileName << ' ' << fileSize << ' ' << getCompessionPercentage(fileSize, fileSize) << '\n';
+  output << fileName << ' ' << fileSize << ' ' << getCompessionPercentage(fileSize, fileSize) << '\n';
   file.close();
   for (const auto& arg: args)
   {
@@ -470,7 +495,7 @@ void rav::compareEncodings(std::istream& in, std::ostream& out, const fileTable&
     out.close();
     file.close();
     size_t compressedSize = getFileSize(arg);
-    out << arg << ' ' << compressedSize << ' ' << getCompessionPercentage(fileSize, compressedSize) << '\n';
+    output << arg << ' ' << compressedSize << ' ' << getCompessionPercentage(fileSize, compressedSize) << '\n';
   }
 }
 
