@@ -144,7 +144,7 @@ void decodeImpl(const std::list< rav::nodePtr >& travers, std::istream &input, s
   rav::nodePtr root = travers.front();
   rav::nodePtr traverser = root;
   int position = 0;
-  char byte;
+  char byte = 0;
   byte = input.get();
   while (!input.eof())
   {
@@ -434,14 +434,21 @@ void rav::compareEncodings(std::istream& in, const fileTable& files, const encod
   {
     throw std::logic_error("No arguments are provided");
   }
+  for (const auto& arg: args)
+  {
+    std::cout << arg << ' ';
+  }
+  std::cout << '\n';
   std::string fileName = args.front();
   args.pop_front();
   if (files.find(fileName) == files.cend())
   {
     throw std::logic_error("No such file is provided");
   }
-  std::cout << getFileSize(files.find(fileName)->second) << '\n';
+  //std::cout << getFileSize(files.find(fileName)->second) << '\n';
   std::ifstream file(files.find(fileName)->second);
+  ScopeGuard outGuard(std::cout);
+
   std::cout << std::fixed << std::setprecision(2);
   size_t fileSize = getFileSize(files.find(fileName)->second);
   std::cout << fileName << ' ' << fileSize << ' ' << getCompessionPercentage(fileSize, fileSize) << '\n';
@@ -468,6 +475,7 @@ void rav::printFiles(std::istream&, const fileTable& files)
   {
     std::cout << ' ' << it->second;
   }
+  std::cout << '\n';
 }
 
 void rav::printTexts(std::istream&, const fileTable& files)
@@ -479,6 +487,7 @@ void rav::printTexts(std::istream&, const fileTable& files)
   {
     std::cout << ' ' << it->first;
   }
+  std::cout << '\n';
 }
 
 void rav::printAll(std::istream&, const fileTable& files)
@@ -487,4 +496,5 @@ void rav::printAll(std::istream&, const fileTable& files)
   {
     std::cout << it->first << ' ' << it->second << '\n';
   }
+  std::cout << '\n';
 }
