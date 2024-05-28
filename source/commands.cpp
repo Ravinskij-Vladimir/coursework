@@ -2,6 +2,8 @@
 #include <iostream>
 #include <fstream>
 #include <iterator>
+#include <algorithm>
+#include <functional>
 #include <iomanip>
 #include "codeWrappers.hpp"
 #include "scopeGuard.hpp"
@@ -47,15 +49,15 @@ void rav::printHelp()
   std::cout << "(for the source text, the text name is displayed instead of the encoding).\n";
 }
 
-void copyFile(std::ifstream& in, std::ostream& out)
-{
-  while(!in.eof())
-  {
-    std::string line;
-    std::getline(in, line, '\n');
-    out << line << '\n';
-  }
-}
+// void copyFile(std::ifstream& in, std::ostream& out)
+// {
+//   while(!in.eof())
+//   {
+//     std::string line;
+//     std::getline(in, line, '\n');
+//     out << line << '\n';
+//   }
+// }
 
 constexpr int bitsInByte()
 {
@@ -76,9 +78,9 @@ void buildHuffmanTree(std::list< rav::nodePtr > &lst, const std::map< char, size
 {
   for (auto itr = alphabet.cbegin(); itr != alphabet.cend(); ++itr)
   {
-    rav::nodePtr p = std::make_shared< rav::Node >();
-    p->symbol = itr->first;
-    p->frequency = itr->second;
+    rav::nodePtr p = std::make_shared< rav::Node >(itr->second, itr->first);
+    // p->symbol = itr->first;
+    // p->frequency = itr->second;
     lst.push_back(p);
   }
 
@@ -202,7 +204,11 @@ void rav::saveText(std::istream& in, fileTable& files)
   {
     throw std::logic_error("Couldn't open file");
   }
-  copyFile(input, output);
+  in >> std::noskipws;
+  using input_it_t = std::istreambuf_iterator< char >;
+  using output_it_t = std::ostream_iterator< char >;
+  std::copy(input_it_t{ input }, input_it_t{}, output_it_t{ output, "" });
+  //copyFile(input, output);
 }
 
 void rav::deleteText(std::istream& in, fileTable& files)
@@ -229,7 +235,11 @@ void rav::printText(std::istream& in, std::ostream& out, const fileTable& files)
   {
     throw std::logic_error("Couldn't open file");
   }
-  copyFile(input, out);
+  using input_it_t = std::istreambuf_iterator< char >;
+  using output_it_t = std::ostream_iterator< char >;
+  std::copy(input_it_t{ input }, input_it_t{}, output_it_t{ out, "" });
+  out << '\n';
+  //copyFile(input, out);
 }
 
 void rav::createEncoding(std::istream& in, encodesTable& encodings, traverserTable& traverses, const fileTable& files)
@@ -254,15 +264,7 @@ void rav::createEncoding(std::istream& in, encodesTable& encodings, traverserTab
   traverses.insert({encodingName, tree});
   rav::nodePtr root = tree.front();
   std::vector< bool > code;
-  try
-  {
-    buildTable(root, code, encodings[encodingName]);
-  }
-  catch (...)
-  {
-    input.close();
-    throw;
-  }
+  buildTable(root, code, encodings[encodingName]);
 }
 
 void rav::deleteEncoding(std::istream& in, encodesTable& encodings, traverserTable& traverses)
@@ -358,9 +360,11 @@ void rav::addEncoding(std::istream& in, encodesTable& encodings, traverserTable&
   traverses.insert({encodingName, newTraverser});
 }
 
-size_t getFrequency(rav::nodePtr& root, const std::vector< bool >& code)
+
+size_t getFrequency(rav::nodePtr root, const std::pair< char,  std::vector< bool > >& map)
 {
-  rav::nodePtr traverser = root;
+  const auto& code = map.second;
+  //auto unaryOperator = 
   for (auto it: code)
   {
     if (root == nullptr)
@@ -386,11 +390,13 @@ void rav::saveEncoding(std::istream& in, const encodesTable& encodings, const tr
   auto endIt = currEncoding->second.cend();
   std::list< size_t > frequencies;
   auto root = traverses.find(encodingName)->second.front();
-  for (auto it = beginIt; it != endIt; ++it)
-  {
-    auto traverser = root;
-    frequencies.push_back(getFrequency(traverser, it->second));
-  }
+  auto unaryOperator = std::bind(getFrequency, root, std::placeholders::_1);
+  std::transform(beginIt, endIt, std::back_inserter(frequencies), unaryOperator);
+  // for (auto it = beginIt; it != endIt; ++it)
+  // {
+  //   auto traverser = root;
+  //   frequencies.push_back(getFrequency(traverser, it->second));
+  // }
 
   output << WriteWrapper{beginIt->first, beginIt->second, frequencies.front()};
   frequencies.pop_front();
