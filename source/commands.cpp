@@ -170,7 +170,6 @@ void decodeImpl(const std::list< rav::nodePtr >& travers, std::istream &input, s
   }
 }
 
-
 void rav::addText(std::istream& in, fileTable& files)
 {
   std::string textName, fileName;
@@ -434,11 +433,11 @@ void rav::compareEncodings(std::istream& in, const fileTable& files, const encod
   {
     throw std::logic_error("No arguments are provided");
   }
-  for (const auto& arg: args)
-  {
-    std::cout << arg << ' ';
-  }
-  std::cout << '\n';
+  // for (const auto& arg: args)
+  // {
+  //   std::cout << arg << ' ';
+  // }
+  // std::cout << '\n';
   std::string fileName = args.front();
   args.pop_front();
   if (files.find(fileName) == files.cend())
@@ -452,15 +451,18 @@ void rav::compareEncodings(std::istream& in, const fileTable& files, const encod
   std::cout << std::fixed << std::setprecision(2);
   size_t fileSize = getFileSize(files.find(fileName)->second);
   std::cout << fileName << ' ' << fileSize << ' ' << getCompessionPercentage(fileSize, fileSize) << '\n';
+  file.close();
   for (const auto& arg: args)
   {
     if (encodings.find(arg) == encodings.cend())
     {
       throw std::logic_error("No such encoding is provided");
     }
+    file.open(files.find(fileName)->second);
     std::ofstream out(arg, std::ios::binary);
     encodeImpl(encodings.find(arg)->second, file, out);
     out.close();
+    file.close();
     size_t compressedSize = getFileSize(arg);
     std::cout << arg << ' ' << compressedSize << ' ' << getCompessionPercentage(fileSize, compressedSize) << '\n';
   }
@@ -468,6 +470,11 @@ void rav::compareEncodings(std::istream& in, const fileTable& files, const encod
 
 void rav::printFiles(std::istream&, const fileTable& files)
 {
+  if (files.empty())
+  {
+    std::cout << "<EMPTY_TEXT>\n";
+    return;
+  }
   auto beginIt = files.cbegin();
   std::cout << beginIt->second;
   ++beginIt;
@@ -480,6 +487,11 @@ void rav::printFiles(std::istream&, const fileTable& files)
 
 void rav::printTexts(std::istream&, const fileTable& files)
 {
+  if (files.empty())
+  {
+    std::cout << "<EMPTY_TEXT>\n";
+    return;
+  }
   auto beginIt = files.cbegin();
   std::cout << beginIt->first;
   ++beginIt;
@@ -492,6 +504,11 @@ void rav::printTexts(std::istream&, const fileTable& files)
 
 void rav::printAll(std::istream&, const fileTable& files)
 {
+  if (files.empty())
+  {
+    std::cout << "<EMPTY_TEXT>\n";
+    return;
+  }
   for (auto it = files.cbegin(); it != files.cend(); ++it)
   {
     std::cout << it->first << ' ' << it->second << '\n';
