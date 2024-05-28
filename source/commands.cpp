@@ -10,43 +10,43 @@
 
 namespace rav = ravinskij;
 
-void rav::printHelp()
+void rav::printHelp(std::ostream& out)
 {
-  std::cout << "Usage: huffman [COMMAND] [FILES]...\n";
-  std::cout << "Working with encoding and decoding texts from files.\n";
-  std::cout << "Example: huffman encode text1 text2 encoding1\n";
-  std::cout << "\nWorking with text:\n";
-  std::cout << "\tadd-text\t <text-name> <file>\n";
-  std::cout << "\tsave-text\t <text-name> <file>\n";
-  std::cout << "\tdelete-text\t <text-name>\n";
-  std::cout << "\tprint-text\t <text-name>\n";
+  out << "Usage: huffman [COMMAND] [FILES]...\n";
+  out << "Working with encoding and decoding texts from files.\n";
+  out << "Example: huffman encode text1 text2 encoding1\n";
+  out << "\nWorking with text:\n";
+  out << "\tadd-text\t <text-name> <file>\n";
+  out << "\tsave-text\t <text-name> <file>\n";
+  out << "\tdelete-text\t <text-name>\n";
+  out << "\tprint-text\t <text-name>\n";
 
-  std::cout << "\nEncoding/decoding:\n";
-  std::cout << "\tcreate-encoding\t <text-name> <encoding-name>\t\n";
-  std::cout << "\tdelete-encoding\t <encoding-name>\t\n";
-  std::cout << "\tencode\t\t <text-name>  <encoded-name> <encoding-name> \t\n";
-  std::cout << "\tdecode\t\t <encoded-text> <decoded-text> <encoding-name>\t\n";
-  std::cout << "\tadd-encoding\t <encoding-name> <file>\t\n";
-  std::cout << "\tsave-encoding\t <encoding-name> <file>\t\n";
+  out << "\nEncoding/decoding:\n";
+  out << "\tcreate-encoding\t <text-name> <encoding-name>\t\n";
+  out << "\tdelete-encoding\t <encoding-name>\t\n";
+  out << "\tencode\t\t <text-name>  <encoded-name> <encoding-name> \t\n";
+  out << "\tdecode\t\t <encoded-text> <decoded-text> <encoding-name>\t\n";
+  out << "\tadd-encoding\t <encoding-name> <file>\t\n";
+  out << "\tsave-encoding\t <encoding-name> <file>\t\n";
 
-  std::cout << "\nComparing encodings:\n";
-  std::cout << "\tcompare-encodings <text-name> <encoding-name-1> <encoding-name-2> <...> <encoding-name-N>\t";
+  out << "\nComparing encodings:\n";
+  out << "\tcompare-encodings <text-name> <encoding-name-1> <encoding-name-2> <...> <encoding-name-N>\t";
 
-  std::cout << "\n\nDescription:\n";
-  std::cout << "\tadd-text\t add text to work with\n";
-  std::cout << "\tsave-text\t write text to the file (content of the file will be overwritten)\n";
-  std::cout << "\tdelete-text\t delete text to work with\n";
-  std::cout << "\tprint-text\t print the text to the console\n";
-  std::cout << "\tcreate-encoding\t create encoding table in accordance with the text\n";
-  std::cout << "\tdelete-encoding\t delete encoding table to work with\n";
-  std::cout << "\tencode\t\t encode the text in accordance with the encoding table\n";
-  std::cout << "\tdecode\t\t decode the text in accordance with the encoding table\n";
-  std::cout << "\tadd-encoding\t add the encoding table from the file in the format 'symbol - binary code'\n";
-  std::cout << "\tsave-encoding\t save the encoding table to the file in the format 'symbol - binary code'\n";
-  std::cout << "\tcompare-encodings\t Compares encodings applied to the same text.\n";
-  std::cout << "\t\t\t\tDisplays a comparison table of the format on the console:";
-  std::cout << "encoding name - size of the compressed text in bytes - \n\t\t\t\tcompression percentage accurate to two decimal places";
-  std::cout << "(for the source text, the text name is displayed instead of the encoding).\n";
+  out << "\n\nDescription:\n";
+  out << "\tadd-text\t add text to work with\n";
+  out << "\tsave-text\t write text to the file (content of the file will be overwritten)\n";
+  out << "\tdelete-text\t delete text to work with\n";
+  out << "\tprint-text\t print the text to the console\n";
+  out << "\tcreate-encoding\t create encoding table in accordance with the text\n";
+  out << "\tdelete-encoding\t delete encoding table to work with\n";
+  out << "\tencode\t\t encode the text in accordance with the encoding table\n";
+  out << "\tdecode\t\t decode the text in accordance with the encoding table\n";
+  out << "\tadd-encoding\t add the encoding table from the file in the format 'symbol - binary code'\n";
+  out << "\tsave-encoding\t save the encoding table to the file in the format 'symbol - binary code'\n";
+  out << "\tcompare-encodings\t Compares encodings applied to the same text.\n";
+  out << "\t\t\t\tDisplays a comparison table of the format on the console:";
+  out << "encoding name - size of the compressed text in bytes - \n\t\t\t\tcompression percentage accurate to two decimal places";
+  out << "(for the source text, the text name is displayed instead of the encoding).\n";
 }
 
 // void copyFile(std::ifstream& in, std::ostream& out)
@@ -419,7 +419,7 @@ double getCompessionPercentage(size_t oldSize, size_t newSize)
   return static_cast<double>((oldSize - newSize)) / oldSize;
 }
 
-void rav::compareEncodings(std::istream& in, const fileTable& files, const encodesTable& encodings)
+void rav::compareEncodings(std::istream& in, std::ostream& out, const fileTable& files, const encodesTable& encodings)
 {
   std::string arg;
   std::list<std::string> args;
@@ -441,22 +441,22 @@ void rav::compareEncodings(std::istream& in, const fileTable& files, const encod
   }
   // for (const auto& arg: args)
   // {
-  //   std::cout << arg << ' ';
+  //   out << arg << ' ';
   // }
-  // std::cout << '\n';
+  // out << '\n';
   std::string fileName = args.front();
   args.pop_front();
   if (files.find(fileName) == files.cend())
   {
     throw std::logic_error("No such file is provided");
   }
-  //std::cout << getFileSize(files.find(fileName)->second) << '\n';
+  //out << getFileSize(files.find(fileName)->second) << '\n';
   std::ifstream file(files.find(fileName)->second);
-  ScopeGuard outGuard(std::cout);
+  ScopeGuard outGuard(out);
 
-  std::cout << std::fixed << std::setprecision(2);
+  out << std::fixed << std::setprecision(2);
   size_t fileSize = getFileSize(files.find(fileName)->second);
-  std::cout << fileName << ' ' << fileSize << ' ' << getCompessionPercentage(fileSize, fileSize) << '\n';
+  out << fileName << ' ' << fileSize << ' ' << getCompessionPercentage(fileSize, fileSize) << '\n';
   file.close();
   for (const auto& arg: args)
   {
@@ -470,54 +470,54 @@ void rav::compareEncodings(std::istream& in, const fileTable& files, const encod
     out.close();
     file.close();
     size_t compressedSize = getFileSize(arg);
-    std::cout << arg << ' ' << compressedSize << ' ' << getCompessionPercentage(fileSize, compressedSize) << '\n';
+    out << arg << ' ' << compressedSize << ' ' << getCompessionPercentage(fileSize, compressedSize) << '\n';
   }
 }
 
-void rav::printFiles(std::istream&, const fileTable& files)
+void rav::printFiles(std::istream&, std::ostream& out, const fileTable& files)
 {
   if (files.empty())
   {
-    std::cout << "<EMPTY_TEXT>\n";
+    out << "<EMPTY_TEXT>\n";
     return;
   }
   auto beginIt = files.cbegin();
-  std::cout << beginIt->second;
+  out << beginIt->second;
   ++beginIt;
   for (auto it = beginIt; it != files.cend(); ++it)
   {
-    std::cout << ' ' << it->second;
+    out << ' ' << it->second;
   }
-  std::cout << '\n';
+  out << '\n';
 }
 
-void rav::printTexts(std::istream&, const fileTable& files)
+void rav::printTexts(std::istream&, std::ostream& out, const fileTable& files)
 {
   if (files.empty())
   {
-    std::cout << "<EMPTY_TEXT>\n";
+    out << "<EMPTY_TEXT>\n";
     return;
   }
   auto beginIt = files.cbegin();
-  std::cout << beginIt->first;
+  out << beginIt->first;
   ++beginIt;
   for (auto it = files.cbegin(); it != files.cend(); ++it)
   {
-    std::cout << ' ' << it->first;
+    out << ' ' << it->first;
   }
-  std::cout << '\n';
+  out << '\n';
 }
 
-void rav::printAll(std::istream&, const fileTable& files)
+void rav::printAll(std::istream&, std::ostream& out, const fileTable& files)
 {
   if (files.empty())
   {
-    std::cout << "<EMPTY_TEXT>\n";
+    out << "<EMPTY_TEXT>\n";
     return;
   }
   for (auto it = files.cbegin(); it != files.cend(); ++it)
   {
-    std::cout << it->first << ' ' << it->second << '\n';
+    out << it->first << ' ' << it->second << '\n';
   }
-  std::cout << '\n';
+  out << '\n';
 }
