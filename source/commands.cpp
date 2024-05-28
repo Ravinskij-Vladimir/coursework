@@ -157,7 +157,8 @@ void decodeImpl(const std::list< rav::nodePtr >& travers, std::istream &input, s
   rav::nodePtr traverser = root;
   int position = 0;
   char byte = 0;
-  byte = input.get();
+  //byte = input.get();
+  input >> byte;
   while (!input.eof())
   {
     bool checkedBitState = byte & (1 << (bitsInByte() - 1 - position));
@@ -177,7 +178,8 @@ void decodeImpl(const std::list< rav::nodePtr >& travers, std::istream &input, s
     if (position == bitsInByte())
     {
       position = 0;
-      byte = input.get();
+      //byte = input.get();
+      input >> byte;
     }
   }
 }
@@ -373,7 +375,6 @@ void rav::addEncoding(std::istream& in, encodesTable& encodings, traverserTable&
 size_t getFrequency(rav::nodePtr root, const std::pair< char,  std::vector< bool > >& map)
 {
   const auto& code = map.second;
-  //auto unaryOperator = 
   for (auto it: code)
   {
     if (root == nullptr)
